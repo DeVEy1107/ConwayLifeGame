@@ -94,7 +94,6 @@ class ConwayLifeGame:
                 elif event.key == pygame.K_q:
                     self.running = False
             
-
     def update(self):
         for r, c in np.ndindex(self.cells.shape):
             pygame.draw.rect(self.screen, self.color_map[r, c], 
