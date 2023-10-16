@@ -1,16 +1,21 @@
 import numpy as np
 
-import colors
 
-def in_boundary(r, c):
-    pass 
+from colors import *
+from constants import HUMAN, GIANT
 
-# def get_alive(cells, r, c, species):
-#     sum_alive = 0
+def get_num_alive(cells, r, c, species):
+    m, n = cells.shape
+    sum_alive = 0
     
-#     for 
-    
-#     return sum_alive
+    for i in range(max(0, r - 1), min(m, r + 2)):
+        for j in range(max(0, c - 1), min(n, c + 2)):
+            if i == r and j == c and cells[i, j] == species:
+                sum_alive -= 1
+            if cells[i, j] == species:
+                sum_alive += 1
+
+    return sum_alive
 
 
 def update(cells):
@@ -18,17 +23,36 @@ def update(cells):
     color_map = np.zeros((cells.shape[0], cells.shape[1], 3))
 
     for r, c in np.ndindex(cells.shape):
-        # num_alive = np.sum(cells[r-1:r+2, c-1:c+2]) - cells[r, c]
 
-        num_alive = get_alive(cells, r, c, 1)
+        species = cells[r, c]
 
-        if cells[r, c] == 1 and num_alive < 2 or num_alive > 3:
-            color_map[r, c] = colors.human_about_to_die
-        elif (cells[r, c] == 1 and 2 <= num_alive <= 3) or (cells[r, c] == 0 and num_alive == 3):
-            color_map[r, c] = colors.human_alive
-            nxt[r, c] = 1
+        num_human = 0
+        num_giant = 0
+        
+        if species == HUMAN:
+            num_giant = get_num_alive(cells, r, c, GIANT)
+        if species == GIANT:
+            num_human = get_num_alive(cells, r, c, HUMAN)
 
-        color_map[r, c] = color_map[r, c] if cells[r, c] == 1 else colors.background
+
+        if species == HUMAN and num_human > 3:
+            color_map[r, c] = background
+        if species == HUMAN and num_giant > 1:
+            color_map[r, c] = background
+
+        if species == GIANT and num_giant > 2:
+            color_map[r, c] = background
+        if species == GIANT and num_human:
+            color_map[r, c] = background
+        
+        if species == 0 and num_human > num_giant:
+            nxt[r, c] = HUMAN if num_human > 2 else 0
+            color_map[r, c] = human_alive
+        else:
+            nxt[r, c] = GIANT if num_giant > 3 else 0
+            color_map[r, c] = giant_alive
+
+        # color_map[r, c] = color_map[r, c] if cells[r, c] == 1 else background
 
     return nxt, color_map
 

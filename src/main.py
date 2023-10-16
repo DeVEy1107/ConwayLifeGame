@@ -4,7 +4,7 @@ import pygame
 from colors import *
 from patterns import *
 from conway import *
-
+from constants import HUMAN, GIANT
 
 def pos2grid(pos, gridsize):
     x, y = pos
@@ -23,10 +23,12 @@ class ConwayLifeGame:
         self.cells = init(rows, cols, BASE_PATTERN)
         self.color_map = []
 
-        self.recording = False 
+        self.mousebtn_pressed = False 
 
         self.running = True
         self.paused = False
+
+        self.is_human = True
 
         self.clock = pygame.time.Clock()
         self.fps = 10
@@ -40,22 +42,28 @@ class ConwayLifeGame:
                     self.paused = not self.paused
                 elif event.key == pygame.K_q:
                     self.running = False
+                elif event.key == pygame.K_s:
+                    self.switch_species()
 
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                self.recording = True
-                self.mouse_positions = []  
-            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                self.recording = False
-            if event.type == pygame.MOUSEMOTION and self.recording:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.mousebtn_pressed = True
+            if event.type == pygame.MOUSEBUTTONUP:
+                self.mousebtn_pressed = False
+            if event.type == pygame.MOUSEMOTION and self.mousebtn_pressed:
                 self.drawCell(event)
-            
+
+    def switch_species(self):
+        if self.paused:
+            self.is_human = not self.is_human
 
     def drawCell(self, event):
         i, j = pos2grid(event.pos, self.gridsize)
         if self.paused:
-            self.cells[i][j] = 1
-            self.color_map[i][j] = human_alive
-            pygame.draw.rect(self.screen, human_alive, 
+            draw_color = human_alive if self.is_human else giant_alive
+            current_species = HUMAN if self.is_human else GIANT
+            self.cells[i][j] = current_species
+            self.color_map[i][j] = draw_color
+            pygame.draw.rect(self.screen, draw_color, 
                             (j * self.gridsize, i * self.gridsize, self.gridsize-1, self.gridsize-1)
             )
             pygame.display.update()
@@ -67,7 +75,6 @@ class ConwayLifeGame:
                               r * self.gridsize,
                               self.gridsize-1, self.gridsize-1)
             )
-
         pygame.display.update()
 
     def run(self):
@@ -76,9 +83,7 @@ class ConwayLifeGame:
 
             if self.paused:
                 self.update() 
-
                 self.clock.tick(60)
-
             else:
                 self.cells, self.color_map = update(self.cells)
                 self.update()
