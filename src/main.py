@@ -1,44 +1,10 @@
 import numpy as np
 import pygame
 
-col_about_to_die = (200, 200, 225)
-col_alive = (255, 255, 215)
-col_background = (0, 10, 100)
-col_grid = (30, 30, 60)
+from colors import *
+from patterns import *
+from conway import *
 
-BASE_PATTERN = np.array([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                         [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                         [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0],
-                         [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0],
-                         [1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                         [1,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                         [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                         [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                         [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]])
-
-def update(screen, cells, cellsize):
-    nxt = np.zeros((cells.shape[0], cells.shape[1]))
-    color_map = np.zeros((cells.shape[0], cells.shape[1], 3))
-
-    for r, c in np.ndindex(cells.shape):
-        num_alive = np.sum(cells[r-1:r+2, c-1:c+2]) - cells[r, c]
-
-        if cells[r, c] == 1 and num_alive < 2 or num_alive > 3:
-            color_map[r, c] = col_about_to_die
-        elif (cells[r, c] == 1 and 2 <= num_alive <= 3) or (cells[r, c] == 0 and num_alive == 3):
-            color_map[r, c] = col_alive
-            nxt[r, c] = 1
-
-        color_map[r, c] = color_map[r, c] if cells[r, c] == 1 else col_background
-
-    return nxt, color_map
-
-def init(dimx, dimy, pattern):
-    cells = np.zeros((dimy, dimx))
-    
-    pos = (3,3)
-    cells[pos[0]:pos[0]+pattern.shape[0], pos[1]:pos[1]+pattern.shape[1]] = pattern
-    return cells
 
 def pos2grid(pos, gridsize):
     x, y = pos
@@ -57,8 +23,6 @@ class ConwayLifeGame:
         self.cells = init(rows, cols, BASE_PATTERN)
         self.color_map = []
 
-        self.mouse_position = (0, 0)
-        self.mouse_positions = []
         self.recording = False 
 
         self.running = True
@@ -77,23 +41,23 @@ class ConwayLifeGame:
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 self.recording = False
             elif event.type == pygame.MOUSEMOTION and self.recording:
-                self.mouse_position = event.pos
-                i, j = pos2grid(event.pos, self.gridsize)
-                if self.paused:
-                    self.cells[i][j] = 1
-                    self.color_map[i][j] = col_alive
-                    pygame.draw.rect(self.screen, col_alive, 
-                                    (j * self.gridsize, i * self.gridsize, self.gridsize-1, self.gridsize-1)
-                    )
-                    pygame.display.update()
-                self.mouse_positions.append(self.mouse_position)  
-            
+                self.drawCell(event)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p: 
                     self.paused = not self.paused
                 elif event.key == pygame.K_q:
                     self.running = False
-            
+
+    def drawCell(self, event):
+        i, j = pos2grid(event.pos, self.gridsize)
+        if self.paused:
+            self.cells[i][j] = 1
+            self.color_map[i][j] = col_alive
+            pygame.draw.rect(self.screen, col_alive, 
+                            (j * self.gridsize, i * self.gridsize, self.gridsize-1, self.gridsize-1)
+            )
+            pygame.display.update()
+
     def update(self):
         for r, c in np.ndindex(self.cells.shape):
             pygame.draw.rect(self.screen, self.color_map[r, c], 
@@ -103,7 +67,6 @@ class ConwayLifeGame:
             )
 
         pygame.display.update()
-        pass
 
     def run(self):
         while self.running:
@@ -112,7 +75,7 @@ class ConwayLifeGame:
             if self.paused:
                 self.update()       
             else:
-                self.cells, self.color_map = update(self.screen, self.cells, self.gridsize)
+                self.cells, self.color_map = update(self.cells)
                 self.update()
 
             self.clock.tick(self.fps)
