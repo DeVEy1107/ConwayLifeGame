@@ -29,31 +29,33 @@ class ConwayLifeGame:
         self.paused = False
 
         self.clock = pygame.time.Clock()
-        self.fps = 60
+        self.fps = 10
 
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                self.recording = True
-                self.mouse_positions = []  
-            elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                self.recording = False
-            elif event.type == pygame.MOUSEMOTION and self.recording:
-                self.drawCell(event)
-            elif event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p: 
                     self.paused = not self.paused
                 elif event.key == pygame.K_q:
                     self.running = False
 
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                self.recording = True
+                self.mouse_positions = []  
+            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                self.recording = False
+            if event.type == pygame.MOUSEMOTION and self.recording:
+                self.drawCell(event)
+            
+
     def drawCell(self, event):
         i, j = pos2grid(event.pos, self.gridsize)
         if self.paused:
             self.cells[i][j] = 1
-            self.color_map[i][j] = col_alive
-            pygame.draw.rect(self.screen, col_alive, 
+            self.color_map[i][j] = human_alive
+            pygame.draw.rect(self.screen, human_alive, 
                             (j * self.gridsize, i * self.gridsize, self.gridsize-1, self.gridsize-1)
             )
             pygame.display.update()
@@ -73,12 +75,15 @@ class ConwayLifeGame:
             self.handle_events()
 
             if self.paused:
-                self.update()       
+                self.update() 
+
+                self.clock.tick(60)
+
             else:
                 self.cells, self.color_map = update(self.cells)
                 self.update()
 
-            self.clock.tick(self.fps)
+                self.clock.tick(self.fps)
 
         pygame.quit()
 
