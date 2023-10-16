@@ -20,7 +20,11 @@ class ConwayLifeGame:
 
         self.screen = pygame.display.set_mode((rows * gridsize, cols * gridsize))
 
-        self.cells = init(rows, cols, BASE_PATTERN)
+        self.levi_img = pygame.transform.scale(pygame.image.load("images\Levi.png"), (gridsize, gridsize))
+        self.giant_img = pygame.transform.scale(pygame.image.load("images\giant.png"), (gridsize, gridsize))
+        self.grass_img = pygame.transform.scale(pygame.image.load("images\grass.png"), (gridsize, gridsize))
+
+        self.init_pattern()
         self.color_map = []
 
         self.mousebtn_pressed = False 
@@ -30,8 +34,15 @@ class ConwayLifeGame:
 
         self.is_human = True
 
+        self.rumbling = False
+
         self.clock = pygame.time.Clock()
         self.fps = 10
+
+    def init_pattern(self):
+        # self.cells = init(self.rows, self.cols, HUMAN_PATTERN, (3, 3))
+        # self.cells = init(self.rows, self.cols, GIANT_PATTERN, (20, 3), self.cells)
+        self.cells = init(self.rows, self.cols, BASE_PATTERN, (3, 3))
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -44,6 +55,10 @@ class ConwayLifeGame:
                     self.running = False
                 elif event.key == pygame.K_s:
                     self.switch_species()
+                elif event.key == pygame.K_r:
+                    self.rumbling  = not self.rumbling 
+                elif event.key == pygame.K_a:
+                    self.anti_shock = not self.anti_shock
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.mousebtn_pressed = True
@@ -63,18 +78,34 @@ class ConwayLifeGame:
             current_species = HUMAN if self.is_human else GIANT
             self.cells[i][j] = current_species
             self.color_map[i][j] = draw_color
-            pygame.draw.rect(self.screen, draw_color, 
-                            (j * self.gridsize, i * self.gridsize, self.gridsize-1, self.gridsize-1)
-            )
+
+            if self.is_human and self.cells[i][j] is not GIANT:
+                self.screen.blit(self.levi_img, (j * self.gridsize, i * self.gridsize))
+            elif not self.is_human and self.cells[i][j] is not HUMAN:
+                self.screen.blit(self.giant_img, (j * self.gridsize, i * self.gridsize))
+
+            # pygame.draw.rect(self.screen, draw_color, 
+            #                 (j * self.gridsize, i * self.gridsize, self.gridsize-1, self.gridsize-1)
+            # )
+
             pygame.display.update()
 
     def update(self):
         for r, c in np.ndindex(self.cells.shape):
-            pygame.draw.rect(self.screen, self.color_map[r, c], 
-                             (c * self.gridsize, 
-                              r * self.gridsize,
-                              self.gridsize-1, self.gridsize-1)
-            )
+            
+            if self.cells[r, c] == 1:
+                self.screen.blit(self.levi_img, (c * self.gridsize, r * self.gridsize))
+            elif self.cells[r, c] == 2: 
+                self.screen.blit(self.giant_img, (c * self.gridsize, r * self.gridsize))
+            else:
+                self.screen.blit(self.grass_img, (c * self.gridsize, r * self.gridsize))
+
+                # pygame.draw.rect(self.screen, self.color_map[r, c], 
+                #              (c * self.gridsize, 
+                #               r * self.gridsize,
+                #               self.gridsize, self.gridsize)
+                # )
+
         pygame.display.update()
 
     def run(self):
@@ -85,7 +116,7 @@ class ConwayLifeGame:
                 self.update() 
                 self.clock.tick(60)
             else:
-                self.cells, self.color_map = update(self.cells)
+                self.cells, self.color_map = update(self.cells, self.rumbling)
                 self.update()
 
                 self.clock.tick(self.fps)
@@ -93,6 +124,6 @@ class ConwayLifeGame:
         pygame.quit()
 
 if __name__ == "__main__":
-    game = ConwayLifeGame(80, 60, 12)
+    game = ConwayLifeGame(30, 25, 50)
     game.run()
 
