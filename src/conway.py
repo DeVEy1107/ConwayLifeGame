@@ -35,7 +35,6 @@ def update(cells, rumbling=False):
             nxt[r, c] = BACKGROUND
             is_eaten = True
 
-        
         if cells[r, c] == HUMAN and num_human < 2 or num_human > 3:
             nxt[r, c] = BACKGROUND
         elif (cells[r, c] == HUMAN and 2 <= num_human <= 3) or (cells[r, c] == BACKGROUND and num_human == 3):

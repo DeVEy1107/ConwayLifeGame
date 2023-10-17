@@ -69,7 +69,7 @@ class ConwayLifeGame:
 
     def draw_cell(self, event):
         i, j = pos2grid(event.pos, self.gridsize)
-        if self.paused:
+        if self.paused and (0 <= i < self.cols and 0 <= j < self.rows):
             self.cells[i][j] = self.selected
 
             if self.selected == HUMAN and (self.cells[i, j] != GIANT or self.cells[i, j] != WALL):
