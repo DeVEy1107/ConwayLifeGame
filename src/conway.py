@@ -1,8 +1,6 @@
 import numpy as np
 
-
-from colors import *
-from constants import HUMAN, GIANT, BACKGROUND
+from constants import HUMAN, GIANT, BACKGROUND, WALL
 
 def get_num_alive(cells, r, c, species):
     m, n = cells.shape
@@ -19,64 +17,40 @@ def get_num_alive(cells, r, c, species):
 
 def update(cells, rumbling=False):
     nxt = np.zeros((cells.shape[0], cells.shape[1]))
-    color_map = np.zeros((cells.shape[0], cells.shape[1], 3))
 
     for r, c in np.ndindex(cells.shape):
 
-        not_eaten = False
+        if cells[r, c] == WALL:
+            nxt[r, c] = WALL
 
         num_human = get_num_alive(cells, r, c, HUMAN)
         num_giant = get_num_alive(cells, r, c, GIANT)
 
-
-        if cells[r, c] == HUMAN and num_giant > 2:
-            nxt[r, c] = GIANT
-            color_map[r, c] = giant_alive
-            not_eaten = True 
+        if cells[r, c] == HUMAN and num_giant > 0:
+            nxt[r, c] = BACKGROUND
         if cells[r, c] == GIANT and num_human > 1:
-            nxt[r, c] = HUMAN
-            color_map[r, c] = human_alive 
-            not_eaten = True 
+            nxt[r, c] = BACKGROUND
         
         if cells[r, c] == HUMAN and num_human < 2 or num_human > 3:
-            color_map[r, c] = human_about_to_die
             nxt[r, c] = BACKGROUND
         elif (cells[r, c] == HUMAN and 2 <= num_human <= 3) or (cells[r, c] == BACKGROUND and num_human == 3):
-            if not_eaten:
-                color_map[r, c] = human_alive
-                nxt[r, c] = HUMAN
-            else:
-                color_map[r, c] = human_alive
-                nxt[r, c] = HUMAN
-            
+            nxt[r, c] = HUMAN
 
         if rumbling:
+            if cells[r, c] == WALL:
+                nxt[r, c] = GIANT
+
             if cells[r, c] == GIANT and num_giant < 1 or num_giant > 2:
-                color_map[r, c] = giant_about_to_die
                 nxt[r, c] = BACKGROUND
             elif (cells[r, c] == GIANT and 1 <= num_giant <= 2) or (cells[r, c] == BACKGROUND and num_giant == 2):
-                if not_eaten:
-                    color_map[r, c] = giant_alive
-                    nxt[r, c] = GIANT
-                else:
-                    color_map[r, c] = giant_alive
-                    nxt[r, c] = GIANT
+                nxt[r, c] = GIANT
         else:
             if cells[r, c] == GIANT and num_giant < 2 or num_giant > 3:
-                color_map[r, c] = giant_about_to_die
                 nxt[r, c] = BACKGROUND
             elif (cells[r, c] == GIANT and 2 <= num_giant <= 3) or (cells[r, c] == BACKGROUND and num_giant == 3):
-                if not_eaten:
-                    color_map[r, c] = giant_alive
-                    nxt[r, c] = GIANT
-                else:
-                    color_map[r, c] = giant_alive
-                    nxt[r, c] = GIANT
-
-
-        color_map[r, c] = color_map[r, c] if (cells[r, c] == HUMAN or cells[r, c] == GIANT) else background
-
-    return nxt, color_map
+                nxt[r, c] = GIANT
+                
+    return nxt
 
 def init(dimx, dimy, pattern, pos, cells=None):
     if cells is None:
