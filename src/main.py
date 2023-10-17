@@ -39,7 +39,7 @@ class ConwayLifeGame:
         self.fps = 10
 
     def init_pattern(self):
-        self.cells = init(self.rows, self.cols, HUMAN_PATTERN, (3, 3))
+        self.cells = init(self.rows, self.cols, HUMAN_PATTERN, (0, 0))
         # self.cells = init(self.rows, self.cols, BASE_PATTERN, (3, 3))
 
     def handle_events(self):
@@ -60,19 +60,14 @@ class ConwayLifeGame:
                 elif event.key == pygame.K_r:
                     self.rumbling  = not self.rumbling 
             
-
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.mousebtn_pressed = True
             if event.type == pygame.MOUSEBUTTONUP:
                 self.mousebtn_pressed = False
             if event.type == pygame.MOUSEMOTION and self.mousebtn_pressed:
-                self.drawCell(event)
+                self.draw_cell(event)
 
-    def switch_species(self):
-        if self.paused:
-            self.is_human = not self.is_human
-
-    def drawCell(self, event):
+    def draw_cell(self, event):
         i, j = pos2grid(event.pos, self.gridsize)
         if self.paused:
             self.cells[i][j] = self.selected
@@ -95,7 +90,6 @@ class ConwayLifeGame:
                 self.screen.blit(self.giant_img, (c * self.gridsize, r * self.gridsize))
             elif self.cells[r, c] == WALL:
                 self.screen.blit(self.wall_img, (c * self.gridsize, r * self.gridsize))
-
         pygame.display.update()
 
     def run(self):

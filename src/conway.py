@@ -20,6 +20,8 @@ def update(cells, rumbling=False):
 
     for r, c in np.ndindex(cells.shape):
 
+        is_eaten = False
+
         if cells[r, c] == WALL:
             nxt[r, c] = WALL
 
@@ -28,13 +30,18 @@ def update(cells, rumbling=False):
 
         if cells[r, c] == HUMAN and num_giant > 0:
             nxt[r, c] = BACKGROUND
+            is_eaten = True
         if cells[r, c] == GIANT and num_human > 1:
             nxt[r, c] = BACKGROUND
+            is_eaten = True
+
         
         if cells[r, c] == HUMAN and num_human < 2 or num_human > 3:
             nxt[r, c] = BACKGROUND
         elif (cells[r, c] == HUMAN and 2 <= num_human <= 3) or (cells[r, c] == BACKGROUND and num_human == 3):
             nxt[r, c] = HUMAN
+            if is_eaten:
+                nxt[r, c] = BACKGROUND
 
         if rumbling:
             if cells[r, c] == WALL:
@@ -44,11 +51,15 @@ def update(cells, rumbling=False):
                 nxt[r, c] = BACKGROUND
             elif (cells[r, c] == GIANT and 1 <= num_giant <= 2) or (cells[r, c] == BACKGROUND and num_giant == 2):
                 nxt[r, c] = GIANT
+                if is_eaten:
+                    nxt[r, c] = BACKGROUND
         else:
             if cells[r, c] == GIANT and num_giant < 2 or num_giant > 3:
                 nxt[r, c] = BACKGROUND
             elif (cells[r, c] == GIANT and 2 <= num_giant <= 3) or (cells[r, c] == BACKGROUND and num_giant == 3):
                 nxt[r, c] = GIANT
+                if is_eaten:
+                    nxt[r, c] = BACKGROUND
                 
     return nxt
 
