@@ -25,5 +25,5 @@ pip install -r requirements.txt
   + G按鍵: 切換至巨人
   + W按鍵: 切換至城牆
   + R按鍵: 發動地鳴(?
-
+  + Q按鍵: 離開遊戲
 
