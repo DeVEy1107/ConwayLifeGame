@@ -7,6 +7,9 @@ from constants import HUMAN, GIANT, WALL
 
 
 def pos2grid(pos, gridsize):
+    '''
+    將視窗中的座標位置轉換成二維陣列的索引位置
+    '''
     x, y = pos
     r = y // gridsize
     c = x // gridsize 
@@ -14,6 +17,12 @@ def pos2grid(pos, gridsize):
 
 class ConwayLifeGame:
     def __init__(self, rows, cols, gridsize):
+        '''
+        Args:
+            - rows: 縱軸方向的網格數量
+            - cols: 橫軸方向的網格數量
+            - gridsize: 網格大小
+        '''
         self.rows = rows
         self.cols = cols
         self.gridsize = gridsize
@@ -21,23 +30,25 @@ class ConwayLifeGame:
         self.load_image()
 
         self.screen = pygame.display.set_mode((rows * gridsize, cols * gridsize))
+        
+        self.clock = pygame.time.Clock()
+        self.fps = 10 
 
         self.init_pattern()
 
-        self.mousebtn_pressed = False 
+        self.mousebtn_pressed = False # 紀錄滑鼠按鍵是否被按下
 
         self.is_running = True
         self.paused = False
 
         self.selected = HUMAN
 
-        self.rumbling = False
-
-        self.clock = pygame.time.Clock()
-        self.fps = 10
-
+        self.rumbling = False # 是否切換發動地鳴
 
     def load_image(self):
+        '''
+        載入圖片素材
+        '''
         self.levi_img = pygame.transform.scale(
             pygame.image.load("images\Levi.png"), (self.gridsize, self.gridsize)
         )
@@ -52,10 +63,16 @@ class ConwayLifeGame:
         )
 
     def init_pattern(self):
-        self.cells = init_pattern(self.rows, self.cols, HUMAN_PATTERN, (0, 0))
-        self.cells = init_pattern(self.rows, self.cols, GIANT_PATTERN, (15, 30), self.cells)
+        '''
+        初始化網格資料中的布局內容
+        '''
+        self.grids = init_pattern(self.rows, self.cols, HUMAN_PATTERN, (0, 0))
+        self.grids = init_pattern(self.rows, self.cols, GIANT_PATTERN, (15, 30), self.grids)
 
     def handle_events(self):
+        '''
+        處理按鍵互動事件
+        '''
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.is_running = False
@@ -81,31 +98,41 @@ class ConwayLifeGame:
                 self.draw_cell(event)
 
     def draw_cell(self, event):
+        '''
+        放置選擇的人物到視窗中
+        '''
         i, j = pos2grid(event.pos, self.gridsize)
         if self.paused and (0 <= i < self.cols and 0 <= j < self.rows):
-            self.cells[i][j] = self.selected
+            self.grids[i][j] = self.selected
 
-            if self.selected == HUMAN and (self.cells[i, j] != GIANT or self.cells[i, j] != WALL):
+            if self.selected == HUMAN and (self.grids[i, j] != GIANT or self.grids[i, j] != WALL):
                 self.screen.blit(self.levi_img, (j * self.gridsize, i * self.gridsize))
-            elif self.selected == GIANT and (self.cells[i, j] != HUMAN or self.cells[i, j] != WALL):
+            elif self.selected == GIANT and (self.grids[i, j] != HUMAN or self.grids[i, j] != WALL):
                 self.screen.blit(self.giant_img, (j * self.gridsize, i * self.gridsize))
-            elif self.selected == WALL and (self.cells[i, j] != HUMAN or self.cells[i, j] != GIANT):
+            elif self.selected == WALL and (self.grids[i, j] != HUMAN or self.grids[i, j] != GIANT):
                 self.screen.blit(self.wall_img, (j * self.gridsize, i * self.gridsize))
 
             pygame.display.update()
 
     def update(self):
-        for r, c in np.ndindex(self.cells.shape):
+        '''
+        將網格資料更新到視窗上
+        '''
+        for r, c in np.ndindex(self.grids.shape):
             self.screen.blit(self.grass_img, (c * self.gridsize, r * self.gridsize))
-            if self.cells[r, c] == HUMAN:
+            if self.grids[r, c] == HUMAN:
                 self.screen.blit(self.levi_img, (c * self.gridsize, r * self.gridsize))
-            elif self.cells[r, c] == GIANT: 
+            elif self.grids[r, c] == GIANT: 
                 self.screen.blit(self.giant_img, (c * self.gridsize, r * self.gridsize))
-            elif self.cells[r, c] == WALL:
+            elif self.grids[r, c] == WALL:
                 self.screen.blit(self.wall_img, (c * self.gridsize, r * self.gridsize))
+
         pygame.display.update()
 
     def run(self):
+        '''
+        開始執行遊戲
+        '''
         while self.is_running:
             self.handle_events()
 
@@ -113,7 +140,7 @@ class ConwayLifeGame:
                 self.update() 
                 self.clock.tick(60)
             else:
-                self.cells = data_update(self.cells, self.rumbling)
+                self.grids = data_update(self.grids, self.rumbling)
                 self.update()
                 self.clock.tick(self.fps)
 
