@@ -1,9 +1,10 @@
 import numpy as np
 import pygame
 
-from patterns import *
-from conway import *
+from patterns import HUMAN_PATTERN
+from conway import data_update, init_pattern
 from constants import HUMAN, GIANT, WALL
+
 
 def pos2grid(pos, gridsize):
     x, y = pos
@@ -17,10 +18,7 @@ class ConwayLifeGame:
         self.cols = cols
         self.gridsize = gridsize
 
-        self.levi_img = pygame.transform.scale(pygame.image.load("images\Levi.png"), (gridsize, gridsize))
-        self.giant_img = pygame.transform.scale(pygame.image.load("images\giant.png"), (gridsize, gridsize))
-        self.grass_img = pygame.transform.scale(pygame.image.load("images\grass.png"), (gridsize, gridsize))
-        self.wall_img = pygame.transform.scale(pygame.image.load("images\wall.png"), (gridsize, gridsize))
+        self.load_image()
 
         self.screen = pygame.display.set_mode((rows * gridsize, cols * gridsize))
 
@@ -28,7 +26,7 @@ class ConwayLifeGame:
 
         self.mousebtn_pressed = False 
 
-        self.running = True
+        self.is_running = True
         self.paused = False
 
         self.selected = HUMAN
@@ -38,19 +36,33 @@ class ConwayLifeGame:
         self.clock = pygame.time.Clock()
         self.fps = 10
 
+
+    def load_image(self):
+        self.levi_img = pygame.transform.scale(
+            pygame.image.load("images\Levi.png"), (self.gridsize, self.gridsize)
+        )
+        self.giant_img = pygame.transform.scale(
+            pygame.image.load("images\giant.png"), (self.gridsize, self.gridsize)
+        )
+        self.grass_img = pygame.transform.scale(
+            pygame.image.load("images\grass.png"), (self.gridsize, self.gridsize)
+        )
+        self.wall_img = pygame.transform.scale(
+            pygame.image.load("images\wall.png"), (self.gridsize, self.gridsize)
+        )
+
     def init_pattern(self):
-        self.cells = init(self.rows, self.cols, HUMAN_PATTERN, (0, 0))
-        # self.cells = init(self.rows, self.cols, BASE_PATTERN, (3, 3))
+        self.cells = init_pattern(self.rows, self.cols, HUMAN_PATTERN, (0, 0))
 
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.running = False
+                self.is_running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p: 
                     self.paused = not self.paused
                 elif event.key == pygame.K_q:
-                    self.running = False
+                    self.is_running = False
                 elif event.key == pygame.K_h:
                     self.selected = HUMAN
                 elif event.key == pygame.K_g:
@@ -59,7 +71,7 @@ class ConwayLifeGame:
                     self.selected = WALL
                 elif event.key == pygame.K_r:
                     self.rumbling  = not self.rumbling 
-            
+        
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.mousebtn_pressed = True
             if event.type == pygame.MOUSEBUTTONUP:
@@ -93,20 +105,20 @@ class ConwayLifeGame:
         pygame.display.update()
 
     def run(self):
-        while self.running:
+        while self.is_running:
             self.handle_events()
 
             if self.paused:
                 self.update() 
                 self.clock.tick(60)
             else:
-                self.cells = update(self.cells, self.rumbling)
+                self.cells = data_update(self.cells, self.rumbling)
                 self.update()
                 self.clock.tick(self.fps)
 
         pygame.quit()
 
 if __name__ == "__main__":
-    game = ConwayLifeGame(50, 30, 30)
+    game = ConwayLifeGame(50, 30, 20)
     game.run()
 
