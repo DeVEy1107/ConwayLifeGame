@@ -1,7 +1,7 @@
 import numpy as np
 import pygame
 
-from patterns import HUMAN_PATTERN
+from patterns import HUMAN_PATTERN, GIANT_PATTERN
 from conway import data_update, init_pattern
 from constants import HUMAN, GIANT, WALL
 
@@ -53,6 +53,7 @@ class ConwayLifeGame:
 
     def init_pattern(self):
         self.cells = init_pattern(self.rows, self.cols, HUMAN_PATTERN, (0, 0))
+        self.cells = init_pattern(self.rows, self.cols, GIANT_PATTERN, (30, 30), self.cells)
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -119,6 +120,6 @@ class ConwayLifeGame:
         pygame.quit()
 
 if __name__ == "__main__":
-    game = ConwayLifeGame(50, 30, 20)
+    game = ConwayLifeGame(80, 50, 15)
     game.run()
 
