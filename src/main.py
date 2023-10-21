@@ -8,7 +8,7 @@ from constants import HUMAN, GIANT, WALL
 
 def pos2grid(pos, gridsize):
     '''
-    將視窗中的座標位置轉換成二維陣列的索引位置
+    將視窗中的座標位置轉換成網格資料中的索引位置
     '''
     x, y = pos
     r = y // gridsize
@@ -18,6 +18,9 @@ def pos2grid(pos, gridsize):
 class ConwayLifeGame:
     def __init__(self, rows, cols, gridsize):
         '''
+        創建一個 rows x cols 大小的二維陣列網格資料以及 (rows * gridsize, cols * gridsize) 
+        個像素格的視窗大小
+
         Args:
             - rows: 縱軸方向的網格數量
             - cols: 橫軸方向的網格數量
@@ -99,7 +102,7 @@ class ConwayLifeGame:
 
     def place_in_grid(self, event):
         '''
-        放置選擇的人物並更新到網格資料中
+        放置選擇的人物更新到網格資料中，並顯示於視窗上
         '''
         i, j = pos2grid(event.pos, self.gridsize)
         if self.paused and (0 <= i < self.cols and 0 <= j < self.rows):
@@ -116,7 +119,7 @@ class ConwayLifeGame:
 
     def update(self):
         '''
-        將網格資料更新到視窗上
+        將網格資料內容更新到視窗上顯示
         '''
         for r, c in np.ndindex(self.grids.shape):
             self.screen.blit(self.grass_img, (c * self.gridsize, r * self.gridsize))
@@ -131,7 +134,7 @@ class ConwayLifeGame:
 
     def run(self):
         '''
-        開始執行遊戲
+        進入遊戲執行迴圈，開始進行遊戲
         '''
         while self.is_running:
             self.handle_events()

@@ -32,6 +32,8 @@ def data_update(grids, rumbling=False):
         - grids: 網格資料
         - rumbling: 是否發動地鳴
     '''
+
+    # 更新至下一階段的網格資料
     nxt = np.zeros((grids.shape[0], grids.shape[1]))
 
     for r, c in np.ndindex(grids.shape):
