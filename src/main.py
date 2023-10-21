@@ -95,11 +95,11 @@ class ConwayLifeGame:
             if event.type == pygame.MOUSEBUTTONUP:
                 self.mousebtn_pressed = False
             if event.type == pygame.MOUSEMOTION and self.mousebtn_pressed:
-                self.draw_cell(event)
+                self.place_in_grid(event)
 
-    def draw_cell(self, event):
+    def place_in_grid(self, event):
         '''
-        放置選擇的人物到視窗中
+        放置選擇的人物並更新到網格資料中
         '''
         i, j = pos2grid(event.pos, self.gridsize)
         if self.paused and (0 <= i < self.cols and 0 <= j < self.rows):
@@ -137,6 +137,7 @@ class ConwayLifeGame:
             self.handle_events()
 
             if self.paused:
+                # 暫停狀態
                 self.update() 
                 self.clock.tick(60)
             else:
