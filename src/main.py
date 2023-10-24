@@ -151,6 +151,6 @@ class ConwayLifeGame:
         pygame.quit()
 
 if __name__ == "__main__":
-    game = ConwayLifeGame(50, 30, 25)
+    game = ConwayLifeGame(60, 30, 25)
     game.run()
 
